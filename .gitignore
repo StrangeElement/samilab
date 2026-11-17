@@ -1,0 +1,24 @@
+# Local Secrets, Credentials & Environment Configs (NEVER COMMIT)
+.env
+.env.*
+!.env.deploy.example
+*.secrets
+*.key
+*.pem
+*.ppk
+config.local.php
+library/config.local.php
+wp-plugin/sami-governance/config.local.php
+
+# Generated Static Cache & Temporary Open Data Exports
+library/static_cache/*.html
+library/exports/*.csv
+library/exports/*.json
+library/exports/*.sqlite
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
