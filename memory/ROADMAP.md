@@ -46,10 +46,11 @@
 ## **Harnais de développement Phase 0 (Local NAS + VS Code / Kilo Code + Git Cloud)**
 - **Point d'entrée unique & Bascule multi-modèles (VS Code + Kilo Code) :** Pilotage en Remote-SSH sur le NAS Ubuntu. Règles globales dans `AGENTS.md`, 5 rôles dans `.kilo/agent/*.md` (permissions Git appliquées par agent) :
   - `sami-orchestrator` (Fable latest) : direction globale, checkpoints, Validation Gate, seul committer.
-  - `sami-architect-opus` (Opus) : fondations critiques (schéma MariaDB, SHA-256, routeur), délègue le reste à `sami-coder-sonnet`.
+  - `sami-architect-opus` (Opus) : fondations critiques (schéma MariaDB, SHA-256, routeur), délégation automatique du reste à `sami-coder-sonnet` via l'outil Kilo `task` (nommé `new_task` dans les directives Inbox).
   - `sami-coder-sonnet` (Sonnet) : exécution des listes de tâches cadrées.
   - `sami-fast-worker` (Haiku / A-B) : tâches courtes et jeux de test, tag `[model: <nom>]` obligatoire.
   - `sami-challenger` (Gemini / ChatGPT / Argon) : revue critique en lecture seule.
+  - **Source unique des rôles :** toute création, modification ou restriction d'outil d'un agent se fait dans son fichier `.kilo/agent/<slug>.md` (l'ancien fichier de modes monolithique est retiré).
 - **Cloisonnement système (`sami-dev`) :** Exécution sous un utilisateur Linux dédié sans privilèges `sudo`, limité strictement aux dossiers du projet (`/var/www/samilab`) et à la base MariaDB de test (`samilab_library_test`), rendant toute suppression accidentelle de l'OS physiquement impossible.
 - **Pont Inbox (Gemini → harnais) :** `scripts/sync-inbox.sh` télécharge le Google Doc « Directives Inbox » vers `/memory/INBOX.md` (zéro token IA) ; l'Orchestrateur intègre chaque nouvel `[ID: ...]` et le consigne dans `STATE.md`.
 - **Facturation & quota cron (Kilo Pass Starter) :** Les futurs scripts cron d'ingestion/analyse passent par Kilo Gateway pour écouler les crédits bonus mensuels, avec un quota quotidien strict préservant un coussin pour le travail interactif.

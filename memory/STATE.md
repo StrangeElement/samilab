@@ -17,8 +17,9 @@
 - Aucun.
 
 ## 3. Points ouverts (à trancher par Richard)
-- Aucun. (2026-11-20 : port SSH de l'hébergement retiré des fichiers suivis, désormais uniquement dans `.env.deploy` ; le NAS de dev utilise le port 22 standard.)
+- Résolu (2026-11-20, approuvé par Richard) : `.gitattributes` racine `* text=auto eol=lf` ajouté ; `scripts/*.sh` commités en 755.
+- **Chemin des agents :** l'Inbox cite `.kilo/*.md` / `.kilo/agents/*.md` ; le chemin réel chargé par Kilo est `.kilo/agent/<slug>.md` (à corriger dans le Google Doc source).
 
 ## 4. Directives Inbox traitées
-- [ID: 2026-11-18-01] — Migration Kilo Code, 5 rôles, délégation Opus → Sonnet, A/B Fast Worker, modèles spécialisés Phase 1, quota cron Kilo Gateway.
-- [ID: 2026-11-20-01] — Rôles définis dans `.kilo/agent/<slug>.md` ; `.kilocodemodes` supprimé et plus référencé dans `AGENTS.md` ni `ROADMAP.md`.
+- [ID: 2026-11-18-01] — Migration Kilo Code, 5 rôles, délégation automatique Opus → Sonnet (outil `task`, ex-`new_task`), tag A/B `[model: <nom>]` du Fast Worker, standards des modèles spécialisés Phase 1 (`AGENTS.md` §6, `ROADMAP.md` §6.D), quota cron Kilo Gateway.
+- [ID: 2026-11-20-01] — Rôles définis dans `.kilo/agent/<slug>.md` (source unique) ; `.kilocodemodes` supprimé et plus référencé dans `AGENTS.md` ni `ROADMAP.md` (revérifié le 2026-11-20 : aucun fichier, mentions historiques uniquement dans `INBOX.md` / `WORKLOG.md` / `STATE.md`).

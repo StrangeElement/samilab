@@ -3,6 +3,13 @@
 
 ---
 
+### 2026-11-20 — Fable / sami-orchestrator (Intégration Inbox + audit de sécurité Git)
+- **Action :** Directives [ID: 2026-11-18-01] et [ID: 2026-11-20-01] complétées : source unique des rôles (`.kilo/agent/<slug>.md`), délégation automatique Opus → Sonnet (outil `task`, ex-`new_task`), tag A/B du Fast Worker, standards des modèles spécialisés Phase 1 et quota cron ajoutés à `AGENTS.md` (§6). Aucun fichier `.kilocodemodes` ; aucune référence hors mentions historiques.
+- **Audit Git :** aucun secret suivi (`.env.local` / `.env.deploy` ignorés, mode 600 ; seuls les `.example` sont suivis ; aucune clé privée). Écarts : pas de `.gitattributes` racine (`eol=lf` limité à `scripts/`), `LICENSE` et `.vscode/tasks.json` en CRLF localement, `scripts/*.sh` en 755 non commité.
+- **Correctifs approuvés par Richard :** `.gitattributes` racine (`* text=auto eol=lf`) ajouté ; bit exécutable (755) des `scripts/*.sh` commité.
+- **Fichiers :** `AGENTS.md`, `.gitattributes` (nouveau), `scripts/*.sh` (mode), `memory/ROADMAP.md`, `memory/STATE.md`, `memory/WORKLOG.md`.
+- **Suite :** Corriger le chemin des agents dans le Google Doc Inbox ; Richard exécute `README-INSTALLATION-NAS.md` ; puis Chantier 0.3 ou 0.2.
+
 ### 2026-11-20 — Claude Opus / sami-architect-opus (Port SSH de production)
 - **Action :** Port SSH de l'hébergement retiré des fichiers suivis : `WHC_PORT` devient obligatoire dans `.env.deploy` (plus de valeur par défaut) ; précision que le NAS de dev utilise le port 22.
 - **Fichiers :** `.env.deploy.example`, `scripts/deploy-whc.sh`, `memory/ROADMAP.md`, `memory/STATE.md`, `memory/WORKLOG.md`.
