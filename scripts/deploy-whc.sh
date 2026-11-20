@@ -32,6 +32,6 @@ echo "Deploying WordPress theme (samilab-pale)..."
 rsync -avz -e "ssh -p $WHC_PORT" "$PROJECT_ROOT/wp-theme/samilab-pale/" "$WHC_USER@$WHC_HOST:~/public_html/wp-content/themes/samilab-pale/"
 
 echo "Deploying Scientific Library PHP 8.3 app (library.samilab.io)..."
-rsync -avz --exclude '.env' --exclude 'config.local.php' --exclude 'static_cache/*' -e "ssh -p $WHC_PORT" "$PROJECT_ROOT/library/" "$WHC_USER@$WHC_HOST:~/library.samilab.io/"
+rsync -avz --exclude '.env' --exclude 'config.local.php' --exclude 'static_cache/*' --exclude 'exports/*' --exclude '*.secrets' -e "ssh -p $WHC_PORT" "$PROJECT_ROOT/library/" "$WHC_USER@$WHC_HOST:~/library.samilab.io/"
 
 echo "Deployment completed successfully."

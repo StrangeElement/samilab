@@ -16,13 +16,14 @@ return [
         'port'     => 3306,
         'dbname'   => 'samilab_library_test',
         'user'     => 'sami_local',
-        'password' => 'sami_local_dev_2026',
+        'password' => 'REPLACE_WITH_LOCAL_DB_PASSWORD',
         'charset'  => 'utf8mb4',
     ],
 
     'security' => [
-        // SHA-256 hash of the single Admin console password
-        'admin_password_hash' => 'REPLACE_WITH_SHA256_HASH',
+        // Argon2id hash of the single Admin console password, generated with:
+        // php -r 'echo password_hash("your-password", PASSWORD_ARGON2ID), PHP_EOL;'
+        'admin_password_hash' => 'REPLACE_WITH_ARGON2ID_HASH',
 
         // SHA-256 hashes of the 3 Bearer API keys
         'api_keys_sha256' => [

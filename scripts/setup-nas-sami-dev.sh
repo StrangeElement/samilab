@@ -1,50 +1,117 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SAMILAB NAS SANDBOX INITIALIZATION SCRIPT (Run once as root/sudo on Ubuntu NAS)
+# SAMILAB NAS SANDBOX INITIALIZATION SCRIPT (run once with sudo on the Ubuntu NAS)
+#
+# Idempotent: safe to re-run on an existing checkout of the repository.
+#
 # Purpose:
-#   1. Create restricted Linux user 'sami-dev' (zero sudo privileges).
-#   2. Configure SSH public key access for VS Code Remote-SSH.
-#   3. Grant exclusive ownership on /var/www/samilab.
-#   4. Initialize local MariaDB test database ('samilab_library_test').
-#   5. Install a 15-minute cron job for automatic Git checkpoint backups.
+#   1. Create the restricted Linux user 'sami-dev' (zero sudo privileges).
+#   2. Copy the invoking admin's SSH public keys for VS Code Remote-SSH.
+#   3. Apply correct ownership and permissions on /var/www/samilab
+#      (directories 2775, files 664, scripts 755, secrets 600) without
+#      touching the .git internals or producing Git file mode changes.
+#   4. Configure Git identity/safety for 'sami-dev'.
+#   5. Initialize the local MariaDB test database and least-privilege user.
+#
+# No cron job is installed: commits and pushes are performed only by the
+# Orchestrator after its Validation Gate (see AGENTS.md, Section 4).
+#
+# Usage:
+#   sudo SAMI_DB_PASSWORD='choose-a-local-password' \
+#        GIT_NAME='Your Name' GIT_EMAIL='you@example.com' \
+#        bash /var/www/samilab/scripts/setup-nas-sami-dev.sh
 # ==============================================================================
-set -e
+set -euo pipefail
 
 PROJECT_DIR="/var/www/samilab"
 DEV_USER="sami-dev"
 WEB_GROUP="www-data"
+DB_NAME="samilab_library_test"
+DB_USER="sami_local"
 
-echo "=== 1. Creating restricted user '$DEV_USER' (no sudo privileges) ==="
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Error: run this script with sudo." >&2
+    exit 1
+fi
+
+if [ ! -d "$PROJECT_DIR/.git" ]; then
+    echo "Error: $PROJECT_DIR is not a Git checkout. Clone the repository first." >&2
+    exit 1
+fi
+
+echo "=== 1. Restricted user '$DEV_USER' (no sudo privileges) ==="
 if ! id "$DEV_USER" &>/dev/null; then
-    sudo adduser --disabled-password --gecos "Sami AI Dev Sandbox" "$DEV_USER"
+    adduser --disabled-password --gecos "Sami AI Dev Sandbox" "$DEV_USER"
 fi
-sudo usermod -aG "$WEB_GROUP" "$DEV_USER"
+usermod -aG "$WEB_GROUP" "$DEV_USER"
 
-echo "=== 2. Configuring SSH authorized_keys for '$DEV_USER' ==="
-sudo mkdir -p /home/$DEV_USER/.ssh
-if [ -f "$HOME/.ssh/authorized_keys" ]; then
-    sudo cp "$HOME/.ssh/authorized_keys" /home/$DEV_USER/.ssh/authorized_keys
+echo "=== 2. SSH authorized_keys for '$DEV_USER' ==="
+ADMIN_USER="${SUDO_USER:-}"
+ADMIN_HOME=""
+if [ -n "$ADMIN_USER" ] && [ "$ADMIN_USER" != "root" ]; then
+    ADMIN_HOME="$(getent passwd "$ADMIN_USER" | cut -d: -f6)"
 fi
-sudo chown -R $DEV_USER:$DEV_USER /home/$DEV_USER/.ssh
-sudo chmod 700 /home/$DEV_USER/.ssh
-sudo chmod 600 /home/$DEV_USER/.ssh/authorized_keys 2>/dev/null || true
+DEV_SSH="/home/$DEV_USER/.ssh"
+install -d -m 700 -o "$DEV_USER" -g "$DEV_USER" "$DEV_SSH"
+if [ -n "$ADMIN_HOME" ] && [ -f "$ADMIN_HOME/.ssh/authorized_keys" ]; then
+    touch "$DEV_SSH/authorized_keys"
+    # Merge keys without duplicating existing entries.
+    sort -u "$DEV_SSH/authorized_keys" "$ADMIN_HOME/.ssh/authorized_keys" -o "$DEV_SSH/authorized_keys"
+    chown "$DEV_USER:$DEV_USER" "$DEV_SSH/authorized_keys"
+    chmod 600 "$DEV_SSH/authorized_keys"
+else
+    echo "Warning: no authorized_keys found for the invoking admin; add keys to $DEV_SSH manually."
+fi
 
-echo "=== 3. Setting directory structure and permissions on $PROJECT_DIR ==="
-sudo mkdir -p "$PROJECT_DIR"/{memory,wp-plugin/sami-governance,wp-theme/samilab-pale,library/{public,src,schema,static_cache,exports},scripts}
-sudo chown -R $DEV_USER:$WEB_GROUP "$PROJECT_DIR"
-sudo chmod -R 2775 "$PROJECT_DIR"
+echo "=== 3. Ownership and permissions on $PROJECT_DIR ==="
+mkdir -p "$PROJECT_DIR"/library/{public,src,schema,static_cache,exports}
+chown -R "$DEV_USER:$WEB_GROUP" "$PROJECT_DIR"
+# Directories: setgid so new files inherit the web group.
+find "$PROJECT_DIR" -path "$PROJECT_DIR/.git" -prune -o -type d -exec chmod 2775 {} +
+# Regular files: never executable by default (keeps Git modes clean).
+find "$PROJECT_DIR" -path "$PROJECT_DIR/.git" -prune -o -type f -exec chmod 664 {} +
+# Shell scripts: executable.
+find "$PROJECT_DIR/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod 755 {} +
+# Local secrets: owner-only (config.local.php must be readable by the web server).
+for secret in "$PROJECT_DIR/.env.local" "$PROJECT_DIR/.env.deploy" "$PROJECT_DIR/.env"; do
+    [ -f "$secret" ] && chmod 600 "$secret"
+done
+for secret in "$PROJECT_DIR/library/config.local.php" "$PROJECT_DIR/wp-plugin/sami-governance/config.local.php"; do
+    [ -f "$secret" ] && chmod 640 "$secret"
+done
 
-echo "=== 4. Creating local MariaDB test database 'samilab_library_test' ==="
-sudo mysql -e "CREATE DATABASE IF NOT EXISTS samilab_library_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mysql -e "CREATE USER IF NOT EXISTS 'sami_local'@'localhost' IDENTIFIED BY 'sami_local_dev_2026';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON samilab_library_test.* TO 'sami_local'@'localhost'; FLUSH PRIVILEGES;"
+echo "=== 4. Git configuration for '$DEV_USER' ==="
+sudo -u "$DEV_USER" git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
+sudo -u "$DEV_USER" git -C "$PROJECT_DIR" config core.fileMode true
+if [ -n "${GIT_NAME:-}" ] && [ -n "${GIT_EMAIL:-}" ]; then
+    sudo -u "$DEV_USER" git config --global user.name "$GIT_NAME"
+    sudo -u "$DEV_USER" git config --global user.email "$GIT_EMAIL"
+else
+    echo "Warning: GIT_NAME/GIT_EMAIL not provided; configure them later as '$DEV_USER'."
+fi
 
-echo "=== 5. Installing automated Git checkpoint cron job (every 15 minutes) ==="
-sudo chmod +x "$PROJECT_DIR/scripts/auto-git-sync.sh" "$PROJECT_DIR/scripts/deploy-whc.sh" 2>/dev/null || true
-CRON_JOB="*/15 * * * * $PROJECT_DIR/scripts/auto-git-sync.sh >/dev/null 2>&1"
-(sudo crontab -u $DEV_USER -l 2>/dev/null | grep -v "auto-git-sync.sh"; echo "$CRON_JOB") | sudo crontab -u $DEV_USER -
+echo "=== 5. Local MariaDB test database '$DB_NAME' ==="
+if [ -z "${SAMI_DB_PASSWORD:-}" ]; then
+    echo "Warning: SAMI_DB_PASSWORD not provided; skipping database setup."
+else
+    mysql <<SQL
+CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$SAMI_DB_PASSWORD';
+CREATE USER IF NOT EXISTS '$DB_USER'@'127.0.0.1' IDENTIFIED BY '$SAMI_DB_PASSWORD';
+GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';
+GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'127.0.0.1';
+FLUSH PRIVILEGES;
+SQL
+fi
+
+echo "=== 6. Removing legacy auto-git-sync cron job (if any) ==="
+if crontab -u "$DEV_USER" -l &>/dev/null; then
+    (crontab -u "$DEV_USER" -l | grep -v "auto-git-sync.sh" || true) | crontab -u "$DEV_USER" -
+fi
 
 echo "=============================================================================="
-echo "SUCCESS: Restricted user '$DEV_USER' is ready and sandboxed in $PROJECT_DIR."
-echo "It has ZERO sudo privileges and cannot modify any OS system files."
+echo "SUCCESS: '$DEV_USER' is ready and sandboxed in $PROJECT_DIR (zero sudo)."
+echo "Next: copy .env.local.example -> .env.local and library/config.example.php"
+echo "      -> library/config.local.php (as $DEV_USER), then re-run this script"
+echo "      to tighten secret file permissions."
 echo "=============================================================================="

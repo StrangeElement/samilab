@@ -43,12 +43,19 @@
 +-------------------------------+         +-------------------------------+
 ```
 
-## **Harnais de développement Phase 0 (Local NAS + VS Code / Roo Code + Git Cloud)**
-- **Point d'entrée unique & Bascule multi-modèles (VS Code + Roo Code) :** Pilotage en Remote-SSH sur le NAS Ubuntu permettant à l'humain de changer de modèle actif à la volée (Claude, Gemini, GPT) dans la même interface, et à l'Orchestrateur de lancer des sous-agents utilisant d'autres modèles (*Boomerang Tasks* via profils API dédiés dans `.roomodes`), aussi bien pour challenger et faire évoluer le plan stratégique que pour générer du code.
-- **Cloisonnement système (`sami-dev`) :** Exécution sous un utilisateur Linux dédié sans privilèges `sudo`, limité strictement aux dossiers du projet (`/var/www/samilab`) et aux bases MariaDB de test (`samilab.test`, `library.test`), rendant toute suppression accidentelle de l'OS physiquement impossible.
+## **Harnais de développement Phase 0 (Local NAS + VS Code / Kilo Code + Git Cloud)**
+- **Point d'entrée unique & Bascule multi-modèles (VS Code + Kilo Code) :** Pilotage en Remote-SSH sur le NAS Ubuntu. Règles globales dans `AGENTS.md`, 5 rôles dans `.kilo/agent/*.md` (permissions Git appliquées par agent) :
+  - `sami-orchestrator` (Fable latest) : direction globale, checkpoints, Validation Gate, seul committer.
+  - `sami-architect-opus` (Opus) : fondations critiques (schéma MariaDB, SHA-256, routeur), délègue le reste à `sami-coder-sonnet`.
+  - `sami-coder-sonnet` (Sonnet) : exécution des listes de tâches cadrées.
+  - `sami-fast-worker` (Haiku / A-B) : tâches courtes et jeux de test, tag `[model: <nom>]` obligatoire.
+  - `sami-challenger` (Gemini / ChatGPT / Argon) : revue critique en lecture seule.
+- **Cloisonnement système (`sami-dev`) :** Exécution sous un utilisateur Linux dédié sans privilèges `sudo`, limité strictement aux dossiers du projet (`/var/www/samilab`) et à la base MariaDB de test (`samilab_library_test`), rendant toute suppression accidentelle de l'OS physiquement impossible.
+- **Pont Inbox (Gemini → harnais) :** `scripts/sync-inbox.sh` télécharge le Google Doc « Directives Inbox » vers `/memory/INBOX.md` (zéro token IA) ; l'Orchestrateur intègre chaque nouvel `[ID: ...]` et le consigne dans `STATE.md`.
+- **Facturation & quota cron (Kilo Pass Starter) :** Les futurs scripts cron d'ingestion/analyse passent par Kilo Gateway pour écouler les crédits bonus mensuels, avec un quota quotidien strict préservant un coussin pour le travail interactif.
 - **Mémoire unique unifiée (`/memory/` + Git Cloud Open Source) :**
   1. Fin de la séparation entre Google Docs et fichiers locaux : dès l'initialisation du dépôt Git, ce Carnet de route stratégique devient `/memory/ROADMAP.md` (accompagné de `STATE.md` et `WORKLOG.md`), servant de source de vérité unique partagée par tous les modèles.
-  2. Sauvegarde nuagique versionnée via un dépôt **Git (GitHub)** couplé à une règle d'auto-commit/push après chaque micro-tâche et un filet de sécurité automatique (cron de sauvegarde), garantissant zéro perte de mémoire même partielle et zéro fuite de secrets (`.gitignore` strict + `.env.deploy`).
+  2. Sauvegarde nuagique versionnée via un dépôt **Git (GitHub, public)**. Aucun commit/push automatique : l'Orchestrateur committe et pousse chaque checkpoint uniquement après sa Validation Gate (`git diff`, zéro secret, zéro changement de mode) et l'approbation explicite de Richard (`.gitignore` strict + `.env.local` / `.env.deploy` / `config.local.php`).
 
 ## **Harnais d'orchestration (MindStudio)**
 - **Infrastructure Cloud :** Élimination de la maintenance locale.
@@ -144,7 +151,7 @@
 # **6. Suivi des chantiers et mémoire d'état**
 ## **A. En cours (Focus actif — Phase 0)**
 - **Statut :** Chantier 0.1 sur WHC Pro finalisé : DNS Cloudflare + SSL/TLS (Full Strict) opérationnels ; PHP 8.3 et MariaDB 10.11.19 LTS actifs ; WordPress installé sur `samilab.io` (mode banc d'essai / `noindex`) ; MediaWiki installé et configuré sur `wiki.samilab.io` (accès publics verrouillés, licence CC BY 4.0, logos et palette Édition Pâle Accessible via SFTP port 27).
-- **Prochaine micro-étape :** Initialiser le harnais multi-agents local sur le NAS (`/var/www/samilab`, utilisateur cloisonné `sami-dev`, dépôt Git Open Source, VS Code + Roo Code) et lancer les Chantiers 0.2 (`sami-governance.php`) et 0.3 (`library.samilab.io` en PHP 8.3).
+- **Prochaine micro-étape :** Finaliser le harnais multi-agents local sur le NAS (`README-INSTALLATION-NAS.md` : permissions `sami-dev`, secrets locaux, accès Git, Remote-SSH, Kilo Code) et lancer les Chantiers 0.2 (`sami-governance.php`) et 0.3 (`library.samilab.io` en PHP 8.3).
 
 ## **B. Feuille de route priorisée — Phase 0 (Chantiers d'initialisation technique)**
 1. **Chantier 0.1 — Socle d'hébergement & Installations (WHC Pro) [FAIT] :** Déployer WordPress (`samilab.io`), MediaWiki (`wiki.samilab.io`) et la base de données MariaDB/MySQL (`library.samilab.io`) avec sécurisation TLS 1.3 / Cloudflare Full Strict et HSTS.
@@ -159,3 +166,11 @@
 3. **Chantier 1.2 — Grille de revue méthodologique (Étape 2) & Choix des modèles :** Affiner la grille d'évaluation critique universelle et sélectionner les modèles optimaux pour les revues.
 4. **Chantier 1.3 — Coordination Multi-Orchestrateurs :** Protocole de discussion (notamment via les pages de discussion du Wiki) et partage du travail entre Claude, Gemini et GPT.
 5. **Chantier 1.4 — Stratégie Média & Recherche élargie :** Déploiement progressif de la production d'infographies, d'articles de synthèse et de vidéos.
+
+## **D. Standards des modèles & outils spécialisés (Phase 1)**
+- **Biologie / biochimie & articles complets :** Gemini Pro (contexte long) + Claude Opus (critique méthodologique).
+- **Argumentation, rhétorique & logique :** modèles de raisonnement (série `o` / DeepSeek R1).
+- **Analyse statistique :** génération et exécution obligatoire de scripts Python (`scipy`, `statsmodels`) — jamais de calcul statistique « de tête » par un LLM.
+- **Infographies scientifiques :** générées par code (SVG / HTML-CSS / Matplotlib / D3), palette Édition Pâle (`#EAEEF3`).
+- **Vidéos :** animations par code (Remotion / FFmpeg) + B-roll génératif ponctuel uniquement.
+- **Veille & vérification API / essais cliniques :** Perplexity Sonar ou recherche web vérifiée.

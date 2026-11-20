@@ -29,6 +29,12 @@ fi
 # Fetch Google Doc as clean Markdown
 curl -fsSL "$INBOX_EXPORT_URL" -o "$TMP_FILE"
 
+# Guard: reject empty responses or HTML pages (e.g. Google login/consent screens)
+if [ ! -s "$TMP_FILE" ] || head -c 512 "$TMP_FILE" | grep -qiE '<!doctype|<html'; then
+    echo "Error: export did not return Markdown (check document sharing settings)." >&2
+    exit 1
+fi
+
 # Update target only if content actually changed
 OLD_HASH=$( [ -f "$TARGET_FILE" ] && sha256sum "$TARGET_FILE" | awk '{print $1}' || echo "none" )
 NEW_HASH=$( sha256sum "$TMP_FILE" | awk '{print $1}' )
