@@ -3,6 +3,11 @@
 
 ---
 
+### 2026-11-20 — Claude Opus / sami-architect-opus (Port SSH de production)
+- **Action :** Port SSH de l'hébergement retiré des fichiers suivis : `WHC_PORT` devient obligatoire dans `.env.deploy` (plus de valeur par défaut) ; précision que le NAS de dev utilise le port 22.
+- **Fichiers :** `.env.deploy.example`, `scripts/deploy-whc.sh`, `memory/ROADMAP.md`, `memory/STATE.md`, `memory/WORKLOG.md`.
+- **Suite :** Validation Gate par `sami-orchestrator`.
+
 ### 2026-11-20 — Fable / sami-orchestrator (Validation Gate du checkpoint harnais)
 - **Action :** Synchronisation de `memory/INBOX.md` ; directive [ID: 2026-11-20-01] vérifiée et consignée ; revue complète de `git status` / `git diff` (zéro secret ajouté, zéro changement de mode, périmètre conforme) ; commit du checkpoint.
 - **Fichiers :** `memory/INBOX.md`, `memory/STATE.md`, `memory/WORKLOG.md`.

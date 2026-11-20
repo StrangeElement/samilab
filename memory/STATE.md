@@ -17,7 +17,7 @@
 - Aucun.
 
 ## 3. Points ouverts (à trancher par Richard)
-- Le port SSH WHC (`27`) figure encore dans des fichiers suivis (`.env.deploy.example`, `scripts/deploy-whc.sh`, `memory/ROADMAP.md`), en contradiction avec `AGENTS.md` section 3. Déjà présent dans l'historique public.
+- Aucun. (2026-11-20 : port SSH de l'hébergement retiré des fichiers suivis, désormais uniquement dans `.env.deploy` ; le NAS de dev utilise le port 22 standard.)
 
 ## 4. Directives Inbox traitées
 - [ID: 2026-11-18-01] — Migration Kilo Code, 5 rôles, délégation Opus → Sonnet, A/B Fast Worker, modèles spécialisés Phase 1, quota cron Kilo Gateway.

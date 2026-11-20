@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# TARGETED PRODUCTION DEPLOYMENT SCRIPT TO WHC PRO (RSYNC OVER SSH PORT 27)
-# Loads server credentials from untracked .env.deploy file (zero secrets in Git)
+# TARGETED PRODUCTION DEPLOYMENT SCRIPT TO WHC PRO (RSYNC OVER SSH)
+# Loads server credentials and SSH port from the untracked .env.deploy file
+# (zero secrets in Git). Production only: the local dev NAS uses port 22.
 # ==============================================================================
 set -e
 
@@ -11,19 +12,17 @@ ENV_FILE="$PROJECT_ROOT/.env.deploy"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "Error: Missing $ENV_FILE file."
-    echo "Copy .env.deploy.example to .env.deploy and fill in WHC_USER and WHC_HOST."
+    echo "Copy .env.deploy.example to .env.deploy and fill in WHC_USER, WHC_HOST and WHC_PORT."
     exit 1
 fi
 
 # shellcheck source=/dev/null
 source "$ENV_FILE"
 
-if [ -z "$WHC_USER" ] || [ -z "$WHC_HOST" ]; then
-    echo "Error: WHC_USER and WHC_HOST must be set in .env.deploy"
+if [ -z "${WHC_USER:-}" ] || [ -z "${WHC_HOST:-}" ] || [ -z "${WHC_PORT:-}" ]; then
+    echo "Error: WHC_USER, WHC_HOST and WHC_PORT must be set in .env.deploy"
     exit 1
 fi
-
-WHC_PORT="${WHC_PORT:-27}"
 
 echo "Deploying WordPress micro-plugin (sami-governance)..."
 rsync -avz --exclude 'config.local.php' -e "ssh -p $WHC_PORT" "$PROJECT_ROOT/wp-plugin/sami-governance/" "$WHC_USER@$WHC_HOST:~/public_html/wp-content/plugins/sami-governance/"

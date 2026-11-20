@@ -150,7 +150,7 @@
 
 # **6. Suivi des chantiers et mémoire d'état**
 ## **A. En cours (Focus actif — Phase 0)**
-- **Statut :** Chantier 0.1 sur WHC Pro finalisé : DNS Cloudflare + SSL/TLS (Full Strict) opérationnels ; PHP 8.3 et MariaDB 10.11.19 LTS actifs ; WordPress installé sur `samilab.io` (mode banc d'essai / `noindex`) ; MediaWiki installé et configuré sur `wiki.samilab.io` (accès publics verrouillés, licence CC BY 4.0, logos et palette Édition Pâle Accessible via SFTP port 27).
+- **Statut :** Chantier 0.1 sur WHC Pro finalisé : DNS Cloudflare + SSL/TLS (Full Strict) opérationnels ; PHP 8.3 et MariaDB 10.11.19 LTS actifs ; WordPress installé sur `samilab.io` (mode banc d'essai / `noindex`) ; MediaWiki installé et configuré sur `wiki.samilab.io` (accès publics verrouillés, licence CC BY 4.0, logos et palette Édition Pâle Accessible via SFTP).
 - **Prochaine micro-étape :** Finaliser le harnais multi-agents local sur le NAS (`README-INSTALLATION-NAS.md` : permissions `sami-dev`, secrets locaux, accès Git, Remote-SSH, Kilo Code) et lancer les Chantiers 0.2 (`sami-governance.php`) et 0.3 (`library.samilab.io` en PHP 8.3).
 
 ## **B. Feuille de route priorisée — Phase 0 (Chantiers d'initialisation technique)**
