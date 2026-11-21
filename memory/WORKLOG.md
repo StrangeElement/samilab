@@ -3,6 +3,11 @@
 
 ---
 
+### 2026-11-21 — Claude Opus / sami-orchestrator (Validation Gate : convention test + garde-fous)
+- **Action :** Revue `git status` / `git diff` : zéro secret, périmètre conforme. Ajout `AGENTS.md` §0 (garde-fous tokens/périmètre, exception « vérifier et commiter+pousser ») et convention mot de passe `test` limitée au NAS de test ; `setup-nas-sami-dev.sh` applique `test` par défaut (surchargeable, rejet quotes/backslashes, `ALTER USER` idempotent) ; guide NAS aligné ; `INBOX.md` synchronisé ; nouveau `scripts/check-git-security.sh` (755) ; `.gitkeep` pour `library/exports/` et `library/static_cache/` ; `.kilo/kilo.jsonc` (schéma seul).
+- **Fichiers :** `AGENTS.md`, `README-INSTALLATION-NAS.md`, `memory/INBOX.md`, `scripts/setup-nas-sami-dev.sh`, `scripts/check-git-security.sh`, `.kilo/kilo.jsonc`, `library/exports/.gitkeep`, `library/static_cache/.gitkeep`, `memory/STATE.md`, `memory/WORKLOG.md`.
+- **Suite :** Richard exécute `README-INSTALLATION-NAS.md` ; puis Chantier 0.3 ou 0.2.
+
 ### 2026-11-20 — Fable / sami-orchestrator (Intégration Inbox + audit de sécurité Git)
 - **Action :** Directives [ID: 2026-11-18-01] et [ID: 2026-11-20-01] complétées : source unique des rôles (`.kilo/agent/<slug>.md`), délégation automatique Opus → Sonnet (outil `task`, ex-`new_task`), tag A/B du Fast Worker, standards des modèles spécialisés Phase 1 et quota cron ajoutés à `AGENTS.md` (§6). Aucun fichier `.kilocodemodes` ; aucune référence hors mentions historiques.
 - **Audit Git :** aucun secret suivi (`.env.local` / `.env.deploy` ignorés, mode 600 ; seuls les `.example` sont suivis ; aucune clé privée). Écarts : pas de `.gitattributes` racine (`eol=lf` limité à `scripts/`), `LICENSE` et `.vscode/tasks.json` en CRLF localement, `scripts/*.sh` en 755 non commité.

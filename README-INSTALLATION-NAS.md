@@ -12,11 +12,11 @@
 
 ## Étape 1 : Finaliser le cloisonnement `sami-dev` (une seule fois, compte admin)
 ```bash
-sudo SAMI_DB_PASSWORD='mot-de-passe-local' \
-     GIT_NAME='Richard Vallée' GIT_EMAIL='ton-email' \
+sudo GIT_NAME='Richard Vallée' GIT_EMAIL='ton-email' \
      bash /var/www/samilab/scripts/setup-nas-sami-dev.sh
 ```
 - Idempotent : relançable sans risque.
+- **Convention serveur de test :** tous les mots de passe non système du NAS de test (BD librairie, WordPress `wordpress.test`, MediaWiki test, console Admin de test, etc.) valent simplement `test`. Le script applique `test` au compte DB `sami_local` par défaut (surchargeable via `SAMI_DB_PASSWORD`) et réinitialise le mot de passe s'il existait déjà. Ne s'applique ni aux comptes système (sudo du NAS) ni à la production.
 - Applique les permissions (dossiers `2775`, fichiers `664`, scripts `755`, secrets `600`/`640`) sans toucher `.git/`.
 - Retire l'ancien cron `auto-git-sync.sh` s'il existe.
 
@@ -29,7 +29,7 @@ cp library/config.example.php library/config.local.php
 chmod 600 .env.local .env.deploy
 chmod 640 library/config.local.php
 ```
-- Dans `config.local.php` : mettre le même mot de passe DB que `SAMI_DB_PASSWORD`.
+- Dans `config.local.php` : mettre `test` comme mot de passe DB (convention serveur de test), ou la valeur de `SAMI_DB_PASSWORD` si surchargée.
 
 ## Étape 3 : Accès Git en écriture pour `sami-dev`
 - Le remote est en HTTPS. Pour que l'Orchestrateur puisse pousser, au choix :

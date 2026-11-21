@@ -17,9 +17,10 @@
 # Orchestrator after its Validation Gate (see AGENTS.md, Section 4).
 #
 # Usage:
-#   sudo SAMI_DB_PASSWORD='choose-a-local-password' \
-#        GIT_NAME='Your Name' GIT_EMAIL='you@example.com' \
+#   sudo GIT_NAME='Your Name' GIT_EMAIL='you@example.com' \
 #        bash /var/www/samilab/scripts/setup-nas-sami-dev.sh
+#   (The local test DB password defaults to "test"; set SAMI_DB_PASSWORD to
+#    override it.)
 # ==============================================================================
 set -euo pipefail
 
@@ -91,18 +92,23 @@ else
 fi
 
 echo "=== 5. Local MariaDB test database '$DB_NAME' ==="
-if [ -z "${SAMI_DB_PASSWORD:-}" ]; then
-    echo "Warning: SAMI_DB_PASSWORD not provided; skipping database setup."
-else
-    mysql <<SQL
+# Test-server convention (AGENTS.md, Section 3): the local NAS test database
+# password defaults to "test". Override with SAMI_DB_PASSWORD if needed.
+SAMI_DB_PASSWORD="${SAMI_DB_PASSWORD:-test}"
+if [[ "$SAMI_DB_PASSWORD" == *"'"* || "$SAMI_DB_PASSWORD" == *"\\"* ]]; then
+    echo "Error: SAMI_DB_PASSWORD must not contain quotes or backslashes." >&2
+    exit 1
+fi
+mysql <<SQL
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$SAMI_DB_PASSWORD';
 CREATE USER IF NOT EXISTS '$DB_USER'@'127.0.0.1' IDENTIFIED BY '$SAMI_DB_PASSWORD';
+ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$SAMI_DB_PASSWORD';
+ALTER USER '$DB_USER'@'127.0.0.1' IDENTIFIED BY '$SAMI_DB_PASSWORD';
 GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';
 GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'127.0.0.1';
 FLUSH PRIVILEGES;
 SQL
-fi
 
 echo "=== 6. Removing legacy auto-git-sync cron job (if any) ==="
 if crontab -u "$DEV_USER" -l &>/dev/null; then

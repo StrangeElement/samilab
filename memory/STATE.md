@@ -1,5 +1,5 @@
 # ÉTAT ACTIF DU PROJET SAMI (STATE.md)
-*Dernière mise à jour : 2026-11-20*
+*Dernière mise à jour : 2026-11-21*
 
 ## 1. Focus immédiat (Phase 0 — Socle technique)
 - **Chantier 0.1 (Serveur WHC Pro) : TERMINÉ**
@@ -9,6 +9,7 @@
 - **Chantier actif : Harnais multi-agents local (`/var/www/samilab`)**
   - FAIT : dépôt GitHub relié (`main`), migration Roo Code → Kilo Code (`AGENTS.md` + `.kilo/agent/*.md`, 5 rôles ; `.kilocodemodes` retiré le 2026-11-20), pont Inbox (`scripts/sync-inbox.sh`).
   - FAIT (2026-11-20, validé par `sami-orchestrator`) : audit de cohérence ; push automatique supprimé au profit de la Validation Gate de l'Orchestrateur ; script `setup-nas-sami-dev.sh` fiabilisé ; guide d'installation réécrit.
+  - FAIT (2026-11-21, validé par `sami-orchestrator`) : garde-fous tokens/périmètre (`AGENTS.md` §0) ; convention mot de passe `test` du NAS de test (`AGENTS.md` §3, `setup-nas-sami-dev.sh` par défaut + `ALTER USER`) ; script `scripts/check-git-security.sh` ; dossiers `library/exports/` et `library/static_cache/` (`.gitkeep`).
   - Prochaine action :
     1. Richard : exécuter les étapes 1 à 5 de `README-INSTALLATION-NAS.md` (permissions, secrets locaux, accès Git `sami-dev`, Remote-SSH, Kilo Code).
     2. Lancer le **Chantier 0.3** (Librairie PHP 8.3 + MariaDB) ou le **Chantier 0.2** (`sami-governance`).

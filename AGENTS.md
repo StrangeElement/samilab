@@ -1,5 +1,10 @@
 # GLOBAL SYSTEM RULES — SAMI PROJECT (AGENTS.md)
 
+## 0. Strict Token & Scope Guardrails
+- **No broad audits:** Never scan the entire repository or inspect `.git/` internals unless explicitly given a specific file path.
+- **Tool call budget:** Limit exploration to a maximum of **5 file reads or commands** per turn. If more inspection is needed, STOP and check with the user whether to continue down that path.
+- **One verb per task:** Do not combine "audit + refactor + commit" in a single run, unless simply "verify and commit+push if valid".
+
 ## 1. HUMAN CONTEXT, LANGUAGE & COGNITIVE ERGONOMICS (ABSOLUTE PRIORITY)
 - The human lead (Richard) is an experienced full-stack developer and Linux/Web administrator living with ME/CFS (limited energy envelope, brain fog, photophobia).
 - **Bilingual Protocol (French Chat / English OSS Code):**
@@ -19,6 +24,7 @@
 - **NEVER** hardcode API keys, passwords, database credentials, server IP addresses, SSH ports, or cPanel usernames inside any Git-tracked file.
 - All local or production secrets must reside exclusively in untracked files ignored by `.gitignore` (`config.local.php`, `.env`, `.env.local`, `.env.deploy`, `*.secrets`), with restrictive permissions (`600`, or `640` when the web server must read them).
 - Always provide safe template files (`config.example.php`, `.env.deploy.example`, `.env.local.example`) with placeholder values.
+- **Test server password convention (NAS dev/test only):** every non-system password on the local test server (library DB user, WordPress `wordpress.test` DB and admin, MediaWiki test DB, test Admin console, etc.) is simply `test`. This applies only to the isolated local NAS test environment and only inside untracked local files (`config.local.php`, `.env.local`, `wp-config.php` of the test instance). It never applies to system accounts (e.g. the NAS sudo account) nor to production (WHC Pro), where strong unique secrets are mandatory.
 
 ## 4. MULTI-AGENT GOVERNANCE & ORCHESTRATOR VALIDATION GATE
 - **Single source of role definitions:** The 5 roles live in `.kilo/agent/<slug>.md` (one Markdown file per agent, Git permissions enforced in each frontmatter). Any creation, modification, or tool restriction of an agent must be applied in that file. Legacy monolithic mode files are retired and must not be recreated.

@@ -9,7 +9,7 @@
 * **Fonctionnement :**  
   1. Le script local `scripts/sync-inbox.sh` télécharge ce document en Markdown vers `/memory/INBOX.md` sans consommer de tokens IA.  
   2. À chaque session, l'Orchestrateur (`sami-orchestrator` / Fable) compare les blocs `[ID: ...]` présents dans `/memory/INBOX.md` avec la liste des IDs déjà traités dans `/memory/STATE.md`.  
-  3. Pour tout nouvel ID : l'Orchestrateur intègre la directive dans `/memory/ROADMAP.md`, `AGENTS.md` ou `.kilo/*.md` selon le cas, puis enregistre l'ID comme traité dans `/memory/STATE.md`.  
+  3. Pour tout nouvel ID : l'Orchestrateur intègre la directive dans `/memory/ROADMAP.md`, `AGENTS.md` ou `.kilo/agent/<slug>.md` selon le cas, puis enregistre l'ID comme traité dans `/memory/STATE.md`.  
 * **Sécurité :** Aucune clé API, mot de passe, adresse IP ou donnée privée ne doit jamais être inscrit dans ce document.
 
 # **Directives actives**
